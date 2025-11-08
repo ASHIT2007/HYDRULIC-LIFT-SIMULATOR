@@ -1,0 +1,378 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Hydraulic Lift Simulator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #111827; /* Slate 900 */
+            --card-color: #1F2937; /* Slate 800 */
+            --border-color: #374151; /* Slate 700 */
+            --text-primary: #F9FAFB; /* Gray 50 */
+            --text-secondary: #9CA3AF; /* Gray 400 */
+            --accent-color: #3B82F6; /* Blue 500 */
+            --fluid-color: #3B82F6;
+            --piston-color: linear-gradient(180deg, #9CA3AF, #6B7280);
+            --weight-color: #D1D5DB;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 400px 1fr;
+            gap: 2rem;
+            width: 100%;
+            max-width: 1400px;
+            height: 700px;
+        }
+
+        /* Controls Panel Styling */
+        .controls-panel {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .controls-panel h1 {
+            font-size: 1.75rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 1rem;
+        }
+
+        .formula {
+            background-color: var(--bg-color);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 1.25rem;
+            font-family: 'Courier New', Courier, monospace;
+            color: var(--accent-color);
+            border: 1px dashed var(--border-color);
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .control-group label {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            cursor: pointer;
+            border-radius: 50%;
+            border: 3px solid var(--card-color);
+        }
+
+        .results-panel {
+            margin-top: auto;
+            background-color: var(--bg-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .results-panel h2 {
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1rem;
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+        }
+        
+        .result-item span {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+        
+        .result-highlight {
+            font-size: 1.5rem;
+            text-align: center;
+            padding: 1rem;
+            margin-top: 1rem;
+            background-color: var(--accent-color);
+            color: white;
+            border-radius: 8px;
+        }
+
+        /* Simulation Panel Styling */
+        .simulation-panel {
+            background-color: var(--card-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .lift-system {
+            width: 100%;
+            height: 100%;
+            border-bottom: 8px solid #4B5563; /* Gray 600 */
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            gap: 2rem;
+        }
+
+        .cylinder {
+            position: relative;
+            background-color: rgba(0,0,0,0.2);
+            border: 2px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 10px 10px 0 0;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .fluid {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: var(--fluid-color);
+            opacity: 0.6;
+            border-radius: 0 0 8px 8px;
+            transition: height 0.5s ease-in-out;
+        }
+
+        .piston {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background: var(--piston-color);
+            transition: height 0.5s ease-in-out;
+        }
+        
+        .platform {
+            position: absolute;
+            top: -10px;
+            left: -15%;
+            width: 130%;
+            height: 10px;
+            background: linear-gradient(90deg, #6B7280, #D1D5DB, #6B7280);
+            border-radius: 3px;
+        }
+
+        .weight {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 40px;
+            background: var(--weight-color);
+            border-radius: 4px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #111827;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- LEFT COLUMN: CONTROLS & DATA -->
+        <div class="controls-panel">
+            <h1>Hydraulic Lift Controls</h1>
+            <div class="formula">
+                P₁ = P₂  ➔  F₁/A₁ = F₂/A₂
+            </div>
+            
+            <div class="control-group">
+                <label for="f1">Input Force (F₁) <span><span id="f1-val">50</span> N</span></label>
+                <input type="range" id="f1" min="1" max="100" value="50">
+            </div>
+
+            <div class="control-group">
+                <label for="r1">Piston 1 Radius (r₁) <span><span id="r1-val">40</span> m</span></label>
+                <input type="range" id="r1" min="10" max="80" value="40">
+            </div>
+
+            <div class="control-group">
+                <label for="r2">Piston 2 Radius (r₂) <span><span id="r2-val">80</span> m</span></label>
+                <input type="range" id="r2" min="20" max="160" value="80">
+            </div>
+
+            <div class="results-panel">
+                <h2>Live Calculation</h2>
+                <div class="result-item">Area₁ (πr₁²): <span id="a1-val">?</span> m²</div>
+                <div class="result-item">Area₂ (πr₂²): <span id="a2-val">?</span> m²</div>
+                <div class="result-item">Mechanical Advantage (A₂/A₁): <span id="ma-val">?</span>x</div>
+                <div class="result-highlight">F₂ = <span id="f2-val">?</span> N</div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: VISUAL SIMULATION -->
+        <div class="simulation-panel">
+            <div class="lift-system">
+                <!-- Piston 1 (Input) -->
+                <div id="cylinder1" class="cylinder">
+                    <div id="fluid1" class="fluid"></div>
+                    <div id="piston1" class="piston">
+                        <div class="platform">
+                            <div id="weight1" class="weight">F₁</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Piston 2 (Output) -->
+                <div id="cylinder2" class="cylinder">
+                     <div id="fluid2" class="fluid"></div>
+                    <div id="piston2" class="piston">
+                        <div class="platform">
+                            <div id="weight2" class="weight">F₂</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- DOM Element Selection ---
+        const f1_slider = document.getElementById('f1');
+        const r1_slider = document.getElementById('r1');
+        const r2_slider = document.getElementById('r2');
+        
+        // Value labels
+        const f1_val_label = document.getElementById('f1-val');
+        const r1_val_label = document.getElementById('r1-val');
+        const r2_val_label = document.getElementById('r2-val');
+
+        // Result displays
+        const a1_val = document.getElementById('a1-val');
+        const a2_val = document.getElementById('a2-val');
+        const ma_val = document.getElementById('ma-val');
+        const f2_val = document.getElementById('f2-val');
+        
+        // Simulation elements
+        const cylinder1 = document.getElementById('cylinder1');
+        const piston1 = document.getElementById('piston1');
+        const fluid1 = document.getElementById('fluid1');
+        const weight1 = document.getElementById('weight1');
+        
+        const cylinder2 = document.getElementById('cylinder2');
+        const piston2 = document.getElementById('piston2');
+        const fluid2 = document.getElementById('fluid2');
+        const weight2 = document.getElementById('weight2');
+
+        const baseHeight = 150; // Base height of pistons in pixels
+
+        // --- Main Calculation and Animation Function ---
+        function calculateAndAnimate() {
+            // 1. Get current values from sliders
+            const f1 = parseFloat(f1_slider.value);
+            const r1 = parseFloat(r1_slider.value);
+            const r2 = parseFloat(r2_slider.value);
+
+            // 2. Update slider value labels
+            f1_val_label.textContent = f1;
+            r1_val_label.textContent = r1;
+            r2_val_label.textContent = r2;
+
+            // 3. Perform physics calculations
+            const a1 = Math.PI * r1 * r1;
+            const a2 = Math.PI * r2 * r2;
+            const mechanicalAdvantage = a2 / a1;
+            const f2 = f1 * mechanicalAdvantage;
+
+            // 4. Update the results panel
+            a1_val.textContent = a1.toFixed(0);
+            a2_val.textContent = a2.toFixed(0);
+            ma_val.textContent = mechanicalAdvantage.toFixed(2);
+            f2_val.textContent = f2.toFixed(2);
+
+            // 5. Calculate visual movement
+            const d1_visual = 50; // Piston 1 will always visually depress by this amount
+            const d2_visual = d1_visual / mechanicalAdvantage;
+
+            // 6. Update visual representation
+            // Cylinder widths (proportional to radius)
+            cylinder1.style.width = r1 * 2 + 'px'; // width = diameter
+            cylinder2.style.width = r2 * 2 + 'px';
+            
+            // Piston and fluid heights
+            const p1_height = baseHeight - d1_visual;
+            const p2_height = baseHeight + d2_visual;
+
+            piston1.style.height = p1_height + 'px';
+            fluid1.style.height = p1_height + 'px';
+            piston2.style.height = p2_height + 'px';
+            fluid2.style.height = p2_height + 'px';
+            
+            // Update weight labels
+            weight1.textContent = `${f1} N`;
+            weight2.textContent = `${f2.toFixed(1)} N`;
+        }
+
+        // --- Event Listeners ---
+        f1_slider.addEventListener('input', calculateAndAnimate);
+        r1_slider.addEventListener('input', calculateAndAnimate);
+        r2_slider.addEventListener('input', calculateAndAnimate);
+
+        // --- Initial Call ---
+        // Run once on page load to set the initial state
+        calculateAndAnimate();
+    </script>
+
+</body>
+</html>
+
